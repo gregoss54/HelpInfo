@@ -30,11 +30,11 @@
             <BooleanToVisibilityConverter x:Key="Converter" />
         </ResourceDictionary>
     </Window.Resources>
-    
+
     <Window.DataContext>
         <Binding Path="WPFParametresView" Source="{StaticResource Locator}" />
     </Window.DataContext>
-    
+
     <i:Interaction.Behaviors>
         <cuilv:WindowCloseBehavior Close="{Binding Close}" />
     </i:Interaction.Behaviors>
@@ -51,7 +51,8 @@
         MaxWidth="1400"
         MaxHeight="1000"
         Margin="16,19,17,0"
-        VerticalAlignment="Top">
+        VerticalAlignment="Top"
+        Background="Transparent">
         <!--  Structure de la page  -->
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="10" />
@@ -65,6 +66,14 @@
             <RowDefinition Height="90" />
             <RowDefinition Height="50" />
         </Grid.RowDefinitions>
+        <StackPanel
+            Grid.Row="1"
+            Grid.Column="1"
+            Width="595"
+            Height="495"
+            Margin="5,5,5,5"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top" />
         <!--  Bouton aide PDF  -->
         <Label
             Name="LbAide"
@@ -95,29 +104,28 @@
         </Label>
         <!--  Déclaration de la listview  -->
         <ListView
-            x:Name="ListViewParamOffi"
+            x:Name="ListeViewParamOfficiels"
             Grid.Row="2"
             Grid.Column="1"
             Grid.ColumnSpan="2"
-                     
             Margin="5,4,4,5"
-            ItemsSource="{Binding ListViewParamOfficiels}"
+            ItemsSource="{Binding ListeViewParamOfficiels}"
+            SelectedItem="{Binding SelectedParamOfficiel}"
             SelectionMode="Single">
-            <!--  Déclenche la fonction qui va permettre de modifier un acte en double cliquant dessus dans la listview  -->
+            <!--  Déclenche la fonction qui va permettre de modifier un param en double cliquant dessus dans la listview  -->
             <i:Interaction.Triggers>
-                <i:EventTrigger EventName="MouseDoubleClick">
+                <!--<i:EventTrigger EventName="MouseDoubleClick">
                     <cmd:EventToCommand
-                        Command="{Binding ModifierCommand }"
-                        CommandParameter="{Binding ElementName=ListViewParamOfficiels, Path=SelectedItem}"
+                        Command="{Binding DataContext.ListeDblClickVersModif, RelativeSource={RelativeSource AncestorType=Window}}"
+                         CommandParameter="{Binding ElementName=ListViewParamOfficiels, Path=SelectedItem}"
                         IsEnabled="{Binding boolDroitModif}" />
-                </i:EventTrigger>
+                </i:EventTrigger>-->
             </i:Interaction.Triggers>
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">
                     <Setter Property="HorizontalContentAlignment" Value="Center" />
                 </Style>
             </ListView.ItemContainerStyle>
-            
             <ListView.View>
                 <GridView>
                     <!--  Pour ne pas deplacer les colonnes  -->
@@ -133,10 +141,9 @@
                             </Style.Triggers>
                         </Style>
                     </GridView.ColumnHeaderContainerStyle>
-
                     <GridViewColumn Width="160">
                         <GridViewColumnHeader
-                            x:Name="Nom"
+                            x:Name="txtNom"
                             Width="auto"
                             Content="Nom" />
                         <GridViewColumn.CellTemplate>
@@ -148,10 +155,9 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-
                     <GridViewColumn Width="60">
                         <GridViewColumnHeader
-                            x:Name="Type"
+                            x:Name="ListType"
                             Width="auto"
                             Content="Type" />
                         <GridViewColumn.CellTemplate>
@@ -163,10 +169,9 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-
                     <GridViewColumn Width="60">
                         <GridViewColumnHeader
-                            x:Name="Valeur"
+                            x:Name="txtValeur"
                             Width="auto"
                             Content="Valeur" />
                         <GridViewColumn.CellTemplate>
@@ -178,7 +183,6 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-
                     <GridViewColumn Width="500">
                         <GridViewColumnHeader x:Name="Commentaires" Content="Commentaires" />
                         <GridViewColumn.CellTemplate>
@@ -190,22 +194,18 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-
                     <GridViewColumn Width="60">
                         <GridViewColumnHeader x:Name="Base" Content="Base" />
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <CheckBox
                                     Name="CbxBase"
-                                    Command="{Binding DataContext.CbxBaseListView, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
-                                    CommandParameter="{Binding}"
                                     FontWeight="Bold"
-                                    IsChecked="{Binding Base, NotifyOnTargetUpdated=True}"
+                                    IsChecked="{Binding Base}"
                                     IsEnabled="False" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-
                     <GridViewColumn Width="150">
                         <GridViewColumnHeader x:Name="DateEntréeVigueur" Content="DateEntréeVigueur" />
                         <GridViewColumn.CellTemplate>
@@ -217,7 +217,6 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-
                     <GridViewColumn Width="auto">
                         <GridViewColumnHeader
                             x:Name="Obligatoire"
@@ -227,16 +226,12 @@
                             <DataTemplate>
                                 <CheckBox
                                     Name="CbxObligatoire"
-                                    Command="{Binding DataContext.CbxObligatoireListView, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
-                                    CommandParameter="{Binding}"
                                     FontWeight="Bold"
-                                    IsChecked="{Binding Obligatoire, NotifyOnTargetUpdated=True}"
+                                    IsChecked="{Binding Obligatoire}"
                                     IsEnabled="False" />
-
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-
                     <GridViewColumn Width="auto">
                         <GridViewColumnHeader
                             x:Name="Supprimer"
@@ -245,13 +240,10 @@
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <CheckBox
-                                    x:Name="CbxSupprimerListView"
-                                    Command="{Binding DataContext.CbxSupprimerListView, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
-                                    CommandParameter="{Binding}"
+                                    x:Name="CbxSupprimerLV"
                                     FontWeight="Bold"
-                                    IsChecked="{Binding Supprimer, NotifyOnTargetUpdated=True}"
+                                    IsChecked="{Binding Supprimer}"
                                     IsEnabled="False" />
-                                <!--  IsEnabled="{Binding Supprimer_Param, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />  -->
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
@@ -261,16 +253,14 @@
         </ListView>
         <!--  Checkbox "Afficher tous les éléments"  -->
         <CheckBox
-            
-            Name="CbkAfficherTout"
+            Name="CbxAfficherTout"
             Grid.Row="3"
             Grid.Column="1"
             Height="49"
             Margin="1,10,949,0"
             VerticalAlignment="Top"
-            Command="{Binding Path=DataContext.chkBoxListeCheck, RelativeSource={RelativeSource AncestorType=Window}}"
+            Command="{Binding CbxAfficherTout, Mode=TwoWay}"
             Content="Afficher tous les éléments"
-            IsChecked="{Binding chkListe, Mode=TwoWay, NotifyOnTargetUpdated=True}"
             IsEnabled="{Binding boolDroitModif}"
             ToolTip="Afficher tous les éléments" />
 
@@ -285,7 +275,17 @@
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
             Content="Afficher uniquement les paramètres personnels"
-            Visibility="Hidden" />
+            IsChecked="{Binding CbxChecked}"
+            Visibility="Hidden">
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="Checked">
+                    <cmd:EventToCommand Command="{Binding CbkOnlyPerso}" />
+                </i:EventTrigger>
+                <i:EventTrigger EventName="Unchecked">
+                    <cmd:EventToCommand Command="{Binding CbkOnlyPersoUnchecked}" />
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+        </CheckBox>
 
         <!--  A l'afffichage de la fenetre parametres agents l'element ComboBox apparait avec un boolean  -->
         <ComboBox
@@ -304,11 +304,13 @@
             Content="{Binding title}"
             FontSize="20"
             FontWeight="Bold" />
-        <!--  StackPanel regroupant mes 3 boutons  -->
+        <!--  StackPanel regroupant mes 4 boutons  -->
         <StackPanel
             Grid.Row="3"
             Grid.Column="1"
-            Margin="300,20,0,12" HorizontalAlignment="Left" Width="530">
+            Width="530"
+            Margin="300,20,0,12"
+            HorizontalAlignment="Left">
             <!--  Bouton ajouter  -->
             <Button
                 Width="90"
@@ -319,6 +321,7 @@
                 HorizontalContentAlignment="Center"
                 Background="SteelBlue"
                 Command="{Binding AjouterCommand}"
+                CommandParameter="{Binding SelectedParamOfficiel}"
                 Content="Ajouter"
                 Cursor="Hand"
                 Foreground="#FFF7EBEB"
@@ -329,17 +332,17 @@
                 Width="90"
                 Height="50"
                 Margin="170,-110,0,0"
+                HorizontalAlignment="Left"
                 VerticalAlignment="Top"
                 Background="SteelBlue"
                 Command="{Binding ModifierCommand}"
-                CommandParameter="{Binding ElementName=ListViewParamOfficiels, Path=SelectedItem}"
-                
+                CommandParameter="{Binding SelectedParamOfficiel}"
                 Content="Modifier"
                 Cursor="Hand"
                 Foreground="#FFF7EBEB"
                 IsEnabled="{Binding boolDroitCT}"
                 KeyboardNavigation.TabIndex="6"
-                RenderTransformOrigin="1.467,0.44" HorizontalAlignment="Left" />
+                RenderTransformOrigin="1.467,0.44" />
             <!--  Bouton Supprimer  -->
             <Button
                 Width="90"
@@ -349,6 +352,7 @@
                 VerticalAlignment="Top"
                 Background="SteelBlue"
                 Command="{Binding SupprimerCommand}"
+                CommandParameter="{Binding SelectedParamOfficiel}"
                 Content="Supprimer"
                 Cursor="Hand"
                 Foreground="#FFF7EBEB"
@@ -373,6 +377,5 @@
                 RenderTransformOrigin="-1.781,0.3" />
 
         </StackPanel>
-
     </Grid>
 </Window>

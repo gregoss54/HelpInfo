@@ -20,7 +20,7 @@ using System.Data.Services;
 using System.Windows.Controls;
 using System.Globalization;
 using System.Text.RegularExpressions;
-using System.Web.UI.MobileControls;
+
 
 
 namespace ClassGetMSReferences.ViewModel
@@ -260,7 +260,6 @@ namespace ClassGetMSReferences.ViewModel
         public RelayCommand QuitterCommand { get; set; }
         public RelayCommand LoadedCommand { get; private set; }
         public RelayCommand ValiderAjoutModifCommand { get; set; }
-        //public RelayCommand<ParamOfficiel> ValiderModificationCommand { get; set; }
         public SqlConnection oConnection { get; private set; }
         //Commande gérant la checkbox"supprimer"
         public RelayCommand CbxSupprimer { get; set; }
@@ -307,6 +306,7 @@ namespace ClassGetMSReferences.ViewModel
                 _dataService.StoreParamOfficiel(NewParamOfficiel);
             else
                 _dataService.UpdateParametreOfficiel(NewParamOfficiel);
+            Close = true;
                        
         }
 

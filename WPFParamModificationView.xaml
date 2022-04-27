@@ -1,0 +1,287 @@
+﻿<Window
+    x:Class="ClassGetMSReferences.Views.WPFParamModificationView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cmd="clr-namespace:GalaSoft.MvvmLight.Command;assembly=GalaSoft.MvvmLight.Platform"
+    xmlns:cuilv="clr-namespace:ClassUILibrary.Views;assembly=ClassUILibrary"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:dialogs="https://github.com/fantasticfiasco/mvvm-dialogs"
+    xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+    xmlns:ignore="http://www.galasoft.ch/ignore"
+    xmlns:local="clr-namespace:ClassGetMSReferences.ViewModel"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:tmpConv="clr-namespace:ClassGetMSUI.Views;assembly=ClassGetMSUI"
+    xmlns:vm="clr-namespace:ClassGetMSReferences.ViewModel"
+    Title="Ajout/Modification d'un paramètre"
+    MaxWidth="700"
+    MaxHeight="400"
+    dialogs:DialogServiceViews.IsRegistered="True"
+    Icon="pack://application:,,,/ClassGetMSReferences;component/Ressources/Proget16.ico"
+    ResizeMode="NoResize"
+    WindowStartupLocation="CenterScreen"
+    mc:Ignorable="d">
+
+    <Window.Resources>
+
+        <ResourceDictionary>
+            <vm:ViewModelLocator x:Key="Locator" d:IsDataSource="True" />
+            <BooleanToVisibilityConverter x:Key="Converter" />
+        </ResourceDictionary>
+    </Window.Resources>
+
+
+    <Window.DataContext>
+        <Binding Path="WPFParamModificationView" Source="{StaticResource Locator}" />
+    </Window.DataContext>
+
+    <i:Interaction.Behaviors>
+        <cuilv:WindowCloseBehavior Close="{Binding Close}" />
+    </i:Interaction.Behaviors>
+
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <cmd:EventToCommand Command="{Binding LoadedCommand, Mode=OneWay}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+
+    <Grid Margin="-2,0,2,0">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="203*" />
+            <ColumnDefinition Width="497*" />
+            <ColumnDefinition Width="62*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="35" />
+            <RowDefinition Height="35" />
+            <RowDefinition Height="35" />
+            <RowDefinition Height="35" />
+            <RowDefinition Height="100" />
+            <RowDefinition Height="5" />
+            <RowDefinition Height="40" />
+            <RowDefinition Height="1" />
+            <RowDefinition Height="77" />
+            <RowDefinition Height="74" />
+        </Grid.RowDefinitions>
+
+        <Label
+            Grid.Row="1"
+            Grid.Column="0"
+            Width="115"
+            Height="26"
+            Margin="0,5,10,0"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Top"
+            Content="Nom du paramètre" />
+        <Label
+            Grid.Row="3"
+            Grid.Column="1"
+            Width="35"
+            Height="26"
+            Margin="257,2,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Content="Type"
+            RenderTransformOrigin="0.857,0.423" />
+        <Label
+            Grid.Row="2"
+            Grid.Column="0"
+            Width="45"
+            Height="26"
+            Margin="0,4,10,0"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Top"
+            Content="Valeur" />
+        <Label
+            Grid.Row="3"
+            Grid.Column="0"
+            Width="145"
+            Height="26"
+            Margin="0,5,10,0"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Top"
+            Content="Date d'entrée en vigueur" />
+        <Label
+            Grid.Row="4"
+            Grid.Column="0"
+            Width="85"
+            Height="26"
+            Margin="0,36,0,39"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Center"
+            Content="Commentaire" />
+
+        <Label
+            Grid.Row="6"
+            Grid.Column="1"
+            Width="35"
+            Height="25"
+            Margin="33,0,0,12"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Bottom"
+            Content="Base"
+            RenderTransformOrigin="0.865,0.5" />
+        <TextBox
+            x:Name="TbxNom"
+            Grid.Row="1"
+            Grid.Column="1"
+            Margin="10,5,120,5"
+            VerticalContentAlignment="Center"
+            IsEnabled="{Binding boolDroitModif}"
+            Text="{Binding Nom}" />
+        <StackPanel
+            Grid.Row="2"
+            Grid.Column="1"
+            Orientation="Horizontal">
+            <TextBox
+                Name="TxtValeur"
+                Width="175"
+                Margin="10,6,10,5"
+                HorizontalAlignment="Stretch"
+                VerticalContentAlignment="Center"
+                Text="{Binding Valeur}" />
+
+        </StackPanel>
+        <StackPanel
+            Grid.Row="3"
+            Grid.Column="1"
+            Margin="0,0,105,0"
+            Orientation="Horizontal">
+            <DatePicker
+                x:Name="DpEntreeVigueur"
+                Width="175"
+                Height="25"
+                Margin="10,5,10,0"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Top"
+                VerticalContentAlignment="Center"
+                IsEnabled="{Binding boolDroitModif}"
+                RenderTransformOrigin="1.824,-1.344"
+                SelectedDate="{Binding DateEntréeVigueur}" />
+        </StackPanel>
+        <TextBox
+            Name="TxtCommentaire"
+            Grid.Row="4"
+            Grid.Column="1"
+            Margin="10,0,120,0"
+            Text="{Binding Commentaire}" />
+        <CheckBox
+            Name="CbxBase"
+            Grid.Row="6"
+            Grid.Column="1"
+            Width="19"
+            Height="20"
+            Margin="87,9,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Command="{Binding DataContext.CbxBase, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+            Content=""
+            IsChecked="{Binding Base}"
+            RenderTransformOrigin="1.294,0" />
+        <Grid Grid.Row="8" Grid.Column="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*" />
+                <ColumnDefinition Width="1*" />
+            </Grid.ColumnDefinitions>
+            <Button
+                x:Name="QuitModif"
+                Grid.Column="1"
+                Width="100"
+                Height="50"
+                Margin="48,0,44,17"
+                VerticalAlignment="Bottom"
+                Background="SteelBlue"
+                Command="{Binding QuitterCommand}"
+                Content="Quitter"
+                FontWeight="Bold"
+                Foreground="#FFF7EBEB"
+                RenderTransformOrigin="0.52,0.88" />
+        </Grid>
+        <Button
+            x:Name="Validate"
+            Grid.Row="8"
+            Grid.Column="0"
+            Width="100"
+            Height="50"
+            Margin="70,0,0,17"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Bottom"
+            Background="SteelBlue"
+            Command="{Binding ValiderAjoutModifCommand}"
+            Content="Valider"
+            FontWeight="Bold"
+            Foreground="#FFF7EBEB"
+            RenderTransformOrigin="0.53,0.98">
+            <Button.Style>
+                <Style TargetType="Button">
+                    <Setter Property="IsEnabled" Value="False" />
+                    <Style.Triggers>
+                        <MultiDataTrigger>
+                            <Setter Property="IsEnabled" Value="True" />
+                            <MultiDataTrigger.Conditions>
+                                <!--<Condition Binding="{Binding Path=(Validation.HasError), ElementName=}" Value="False" />
+                                <Condition Binding="{Binding Path=(Validation.HasError), ElementName=}" Value="False" />-->
+                            </MultiDataTrigger.Conditions>
+                        </MultiDataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Button.Style>
+        </Button>
+        <ComboBox
+            Name="CbxType"
+            Grid.Row="3"
+            Grid.Column="1"
+            Height="25"
+            Margin="317,0,120,9"
+            VerticalAlignment="Bottom"
+            ItemsSource="{Binding ListeTypes}"
+            RenderTransformOrigin="0.583,0.318"
+            SelectedItem="{Binding Type}"
+            SelectedValuePath="Type" />
+
+        <Label
+            Grid.Row="6"
+            Grid.Column="1"
+            Width="70"
+            Height="30"
+            Margin="137,0,0,7"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Bottom"
+            Content="Obligatoire"
+            RenderTransformOrigin="0.5,1" />
+        <CheckBox
+            Name="CbxObligatoire"
+            Grid.Row="6"
+            Grid.Column="1"
+            Width="20"
+            Height="15"
+            Margin="222,9,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Command="{Binding DataContext.CbxObligatoire, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+            Content=""
+            IsChecked="{Binding Obligatoire}"
+            RenderTransformOrigin="1.25,1.333" />
+        <Label
+            Grid.Row="6"
+            Grid.Column="1"
+            Width="65"
+            Height="30"
+            Margin="267,0,0,7"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Bottom"
+            Content="Supprimer" />
+        <CheckBox
+            Name="CbxSupprimer"
+            Grid.Row="6"
+            Grid.Column="1"
+            Width="20"
+            Height="20"
+            Margin="0,9,120,0"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Top"
+            Command="{Binding DataContext.CbxSupprimer, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+            Content=""
+            IsChecked="{Binding Supprimer}"
+            RenderTransformOrigin="0.211,-0.667" />
+    </Grid>
+</Window>
