@@ -1,4 +1,4 @@
-﻿using ClassGetMS;
+using ClassGetMS;
 using System;
 using System.Collections.Generic;
 using System.Linq;

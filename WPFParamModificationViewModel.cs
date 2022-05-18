@@ -1,22 +1,12 @@
 ﻿using GalaSoft.MvvmLight;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ClassGetMSReferences.Views;
-using System.Windows;
 using GalaSoft.MvvmLight.CommandWpf;
 using ClassGetMS.Services;
 using MvvmDialogs;
 using System.Data.SqlClient;
-using System.Diagnostics;
-using System.Data;
 using ClassGetMS;
-using System.Data.Common;
 using ClassGetMS.Models;
-using System.Data.Entity;
-using System.Data.Services;
 using System.Windows.Controls;
 using System.Globalization;
 using System.Text.RegularExpressions;
@@ -27,6 +17,8 @@ namespace ClassGetMSReferences.ViewModel
 {
     public class WPFParamModificationViewModel : ViewModelBase, IModalDialogViewModel
     {
+        #region Propriétés
+
         private IDialogService _dialogService;
         private IDataService _dataService;
         public StrucParam ParamGlobaux;
@@ -34,7 +26,7 @@ namespace ClassGetMSReferences.ViewModel
         public List<ParamOfficiel> ListeViewParamOfficiels { get; set; }
         public bool checkCode;
 
-        #region Propriétés
+       
         //instanciation obligatoire d'un boolean à l'appel du DialogService
         public bool? DialogResult
         {
@@ -185,11 +177,6 @@ namespace ClassGetMSReferences.ViewModel
             }
         }
 
-
-
-
-
-
         private bool _Close;
         public bool Close
         {
@@ -206,10 +193,6 @@ namespace ClassGetMSReferences.ViewModel
                 }
             }
         }
-        //Declaration d'un booleen gerant si l'on peut sortir sans message d'avertissement
-        //A chaque modification d'un attribut , on le passe a faux
-
-
        
         private string _Titre;
         public string Titre
@@ -231,39 +214,73 @@ namespace ClassGetMSReferences.ViewModel
 
         #endregion
 
-        #region Constructeurs
-
-        private WPFParamModificationViewModel()
+        #region Initialize
+        private void Initialize()
         {
-            paramOff = new ParamOfficiel();
+
+            Close = false;
+            ParamGlobaux = _dataService.ParamGlobaux;
+            oConnection = new SqlConnection(_dataService.ParamGlobaux.ConnectionString);
+            ListeTypes = new List<String> { "B", "C", "D", "N" };
+
+            //Recuperation de l'existant pour ajout/modif
+            if (SelectedParamOfficiel != null)
+            {
+                Nom = SelectedParamOfficiel.Nom;
+                Type = SelectedParamOfficiel.Type;
+                Valeur = SelectedParamOfficiel.Valeur;
+                Commentaire = SelectedParamOfficiel.Commentaire;
+                Base = SelectedParamOfficiel.Base;
+                DateEntréeVigueur = SelectedParamOfficiel.DateEntréeVigueur;
+                Obligatoire = SelectedParamOfficiel.Obligatoire;
+                Supprimer = SelectedParamOfficiel.Supprimer;
+            }
+            else
+            //Instanciation Nouveau paramètre
+            {
+                Nom = "";
+                Type = "C";
+                Valeur = "";
+                Commentaire = "";
+                Base = false;
+                DateEntréeVigueur = DateTime.Today;
+                Obligatoire = false;
+                Supprimer = false;
+            }
+
         }
+        #endregion
+
+        #region Constructeurs
 
         public WPFParamModificationViewModel(IDataService dataService, IDialogService dialogService)
         {
-            this._dataService = dataService;
-            this._dialogService = dialogService;
-           
+            _dataService = dataService;
+            _dialogService = dialogService;
+       
+
             QuitterCommand = new RelayCommand(() => Close = true);
             LoadedCommand = new RelayCommand(() => Initialize());
             CbxBase = new RelayCommand(() => ComboBase());
             CbxObligatoire = new RelayCommand(() => ComboObligatoire());
             CbxSupprimer = new RelayCommand(() => ComboSupprimer());
             ValiderAjoutModifCommand = new RelayCommand(() =>SaveParamOfficiel());
-
+       
         }
 
         #endregion
 
-
         #region Declaration RelayCommand
-
+        //Commande du bouton quitter
         public RelayCommand QuitterCommand { get; set; }
+        //Commande de chargement
         public RelayCommand LoadedCommand { get; private set; }
+        //Commande du bouton Valider
         public RelayCommand ValiderAjoutModifCommand { get; set; }
         public SqlConnection oConnection { get; private set; }
         //Commande gérant la checkbox"supprimer"
         public RelayCommand CbxSupprimer { get; set; }
-        //Commande gérant la checkbox"Obligatiore"
+        //Commande gérant la checkbox"Obligatiore" 
         public RelayCommand CbxObligatoire { get; set; }
         //Commande gérant la checkbox"Base"
         public RelayCommand CbxBase { get; set; }
@@ -272,22 +289,23 @@ namespace ClassGetMSReferences.ViewModel
 
         #region Methodes
 
+        //Booléen renvoyant l'état "supprimer" dans la LV
         private bool ComboSupprimer()
         {
             return Supprimer;
         }
-
+        //Booléen renvoyant l'état "obligatoire" dans la LV
         private bool ComboObligatoire()
         {
             return Obligatoire;
         }
-
+        //Booléen renvoyant l'état "base" dans la LV
         private bool ComboBase()
         {
             return Base;
         }
 
-        // Ajout et modif d'un paramètre
+        // Ajout et modif d'un paramètre (utilisation des methodes de DataService "update" et "store")
         public void SaveParamOfficiel()
         {
             this.NewParamOfficiel = new ParamOfficiel();
@@ -300,62 +318,19 @@ namespace ClassGetMSReferences.ViewModel
             NewParamOfficiel.Base = Base;
             NewParamOfficiel.Supprimer = Supprimer;
 
-            bool exist =(NewParamOfficiel.Nom != SelectedParamOfficiel.Nom || NewParamOfficiel.DateEntréeVigueur != SelectedParamOfficiel.DateEntréeVigueur ? true : false) ;
+            bool exist = true;
+            if (SelectedParamOfficiel != null)
+                exist =(NewParamOfficiel.Nom != SelectedParamOfficiel.Nom || NewParamOfficiel.DateEntréeVigueur != SelectedParamOfficiel.DateEntréeVigueur ? true : false) ;
 
-            if (checkCode  && exist)
-                _dataService.StoreParamOfficiel(NewParamOfficiel);
+            if (!checkCode  && !exist)
+                _dataService.UpdateParametreOfficiel(NewParamOfficiel);      
             else
-                _dataService.UpdateParametreOfficiel(NewParamOfficiel);
+                _dataService.StoreParamOfficiel(NewParamOfficiel);
             Close = true;
                        
         }
 
-        public void ActualiseListView()
-        {
-            oConnection = new SqlConnection(_dataService.ParamGlobaux.ConnectionString);
-            ListeViewParamOfficiels = _dataService.GetParametreOfficiel();
 
-        }
-
-        #endregion
-
-
-
-        #region Initialize
-        private void Initialize()
-        {
-            
-            Close = false;
-            ParamGlobaux = _dataService.ParamGlobaux;
-            oConnection = new SqlConnection(_dataService.ParamGlobaux.ConnectionString);
-            ListeTypes = new List<String> { "B", "C", "D", "N" };
-
-            //Recuperation de l'existant pour ajout/modif
-            
-            Nom = SelectedParamOfficiel.Nom;
-            Type = SelectedParamOfficiel.Type;
-            Valeur = SelectedParamOfficiel.Valeur;
-            Commentaire = SelectedParamOfficiel.Commentaire;
-            Base = SelectedParamOfficiel.Base;
-            DateEntréeVigueur = SelectedParamOfficiel.DateEntréeVigueur;
-            Obligatoire = SelectedParamOfficiel.Obligatoire;
-            Supprimer = SelectedParamOfficiel.Supprimer;
-
-
-            ////Ajout d'un paramètre partant de rien 
-            //WPFParamModificationViewModel NouvelleLigne = new WPFParamModificationViewModel();
-          
-            //Nom = NouvelleLigne.Nom;
-            //Type = NouvelleLigne.Type;
-            //Valeur = NouvelleLigne.Valeur;
-            //Commentaire = NouvelleLigne.Commentaire;
-            //Base = NouvelleLigne.Base;
-            //DateEntréeVigueur = NouvelleLigne.DateEntréeVigueur;
-            //Obligatoire = NouvelleLigne.Obligatoire;
-            //Supprimer = NouvelleLigne.Supprimer;
-            
-
-        }
         #endregion
 
         #region Variables
@@ -391,9 +366,10 @@ namespace ClassGetMSReferences.ViewModel
                 RaisePropertyChanged("ListeTypes");
             }
         }
-
+        /// <summary>
+        /// Création d'une variable de type ObservableObject (qui se remplira au fur et à mesure de la saisie des informations)
+        /// </summary>
         private ParamOfficiel _paramOff;
-        //création d'une variable de type ObservableObject (qui se remplira au fur et à mesure de la saisie des informations)
         public ParamOfficiel paramOff
         {
             get
@@ -409,98 +385,10 @@ namespace ClassGetMSReferences.ViewModel
                 }
             }
         }
-
-
-
-
-        #endregion
-
-        #region Constructeur
-        /// <summary>
-        /// Classe dont la fonction est de définir les objets qui devront être observés.
-        /// Permet ainsi de faire le lien avec la page WPF par l'intermédiaire du Binding.
-        /// Necessite l'implémentation de ObservableObject
-        /// </summary>
-        //public class ParamOfficielObservable : ObservableObject
-        //{
-
-        //    /// <summary>
-        //    /// constructeur de la classe
-        //    /// </summary>
-        //    /// <param name="Nom"></param>
-        //    /// <param name="type"></param>
-        //    /// <param name="valeur"></param>
-        //    /// <param name="commentaire"></param>
-        //    /// <param name="base"></param>
-        //    /// <param name="obligatoire"></param>
-        //    /// <param name="supprimer"></param>
-        //    ///  
-        //    public ParamOfficielObservable(string Nom, string Type, string Valeur, string Commentaire, bool Base, DateTime DateEntréeVigueur, bool Obligatoire, bool Supprimer)
-        //    {
-        //        this.Nom = Nom;
-        //        this.Type = Type;
-        //        this.Valeur = Valeur;
-        //        this.Commentaire = Commentaire;
-        //        this.Base = Base;
-        //        this.DateEntréeVigueur = DateEntréeVigueur;
-        //        this.Obligatoire = Obligatoire;
-        //        this.Supprimer = Supprimer;
-        //        this.AllowExit = true;
-        //    }
-        //    public ParamOfficielObservable (ParamOfficiel paramOff)
-        //    {
-        //        this.Nom = paramOff.Nom;
-        //        this.Type = paramOff.Type;
-        //        this.Valeur = paramOff.Valeur;
-        //        this.Commentaire = paramOff.Commentaire;
-        //        this.Base = paramOff.Base;
-        //        this.DateEntréeVigueur = paramOff.DateEntréeVigueur;
-        //        this.Obligatoire = paramOff.Obligatoire;
-        //        this.Supprimer = paramOff.Supprimer;
-        //        this.AllowExit = true;
-        //    }
-        //    /// <summary>
-        //    /// méthode de conversion d'un ObjetObservable en Param
-        //    /// <param name="ObjetObservable"></param>
-        //    /// <returns></returns>
-
-        //    public static ParamOfficiel ConversionEnParamOfficiel(ParamOfficielObservable ObjetObservable)
-        //    {
-        //        //créons un nouveau paramètre
-        //        ParamOfficiel paramOff = new ParamOfficiel();
-
-        //        //definissons ce paramètre
-        //        paramOff.Nom = ObjetObservable.Nom;
-        //        paramOff.Type = ObjetObservable.Type;
-        //        paramOff.Valeur = ObjetObservable.Valeur;
-        //        paramOff.Commentaire = ObjetObservable.Commentaire;
-        //        paramOff.Base = false;
-        //        paramOff.DateEntréeVigueur = ObjetObservable.DateEntréeVigueur;
-        //        paramOff.Obligatoire = false;
-        //        paramOff.Supprimer = false;
-
-        //        return paramOff;
-        //    }
-        //    //declaration d'un constructeur vide
-        //    public ParamOfficielObservable()
-        //    {
-        //        Nom = "";
-        //        Type = "";
-        //        Valeur = "";
-        //        Commentaire = "";
-        //        Base = false;
-        //        DateEntréeVigueur = DateTime.Now;
-        //        Obligatoire = false;
-        //        Supprimer = false;
-        //        AllowExit = true;
-
-        //    }
-
-
-
-
+        
         //A chaque modification d'un attribut, on le passe a faux
         private bool _AllowExit;
+        public static bool val { get; internal set; }
         public bool AllowExit
         {
             get
@@ -517,7 +405,7 @@ namespace ClassGetMSReferences.ViewModel
             }
         }
     }
-    #endregion
+        #endregion
 
         #region Controle de saisie de l'ajout/Modif
 
@@ -534,7 +422,7 @@ namespace ClassGetMSReferences.ViewModel
             }
             else
             {
-                WPFLieuxViewModel.val = true;
+                WPFParamModificationViewModel.val = true;
                 if (!Regex.IsMatch(value.ToString(), @"^[a-zA-Z '-éèêïôàâù]+$"))
                 {
                     return new ValidationResult(false, "Caractères spéciaux interdits");
@@ -557,7 +445,7 @@ namespace ClassGetMSReferences.ViewModel
             }
             else
             {
-                WPFParametresViewModel.val = true;
+                WPFParamModificationViewModel.val = true;
                 if (!Regex.IsMatch(value.ToString(), @"^[a-zA-Z '-éèêïôàâù]+$"))
                 {
                     return new ValidationResult(false, "Caractères spéciaux interdits");
@@ -580,7 +468,7 @@ namespace ClassGetMSReferences.ViewModel
             }
             else
             {
-                WPFParametresViewModel.val = true;
+                WPFParamModificationViewModel.val = true;
                 if (!Regex.IsMatch(value.ToString(), @"^[a-zA-Z '-éèêïôàâù]+$"))
                 {
                     return new ValidationResult(false, "Caractères spéciaux interdits");
@@ -603,7 +491,7 @@ namespace ClassGetMSReferences.ViewModel
             }
             else
             {
-                WPFParametresViewModel.val = true;
+                WPFParamModificationViewModel.val = true;
                 if (!Regex.IsMatch(value.ToString(), @"^[a-zA-Z '-éèêïôàâù]+$"))
                 {
                     return new ValidationResult(false, "Caractères spéciaux interdits");
@@ -624,13 +512,13 @@ namespace ClassGetMSReferences.ViewModel
             DateTime date = new DateTime();
             if (!DateTime.TryParse(((DateTime)value).ToString(), out date))
             {
-                return new ValidationResult(false, "Invalid date format");
+                return new ValidationResult(false, "Format de date invalide");
             }
             else
             {
-                if (date.CompareTo(this.EarlyDate) < 0)// set the logical to validate
+                if (date.CompareTo(this.EarlyDate) < 0)
                 {
-                    return new ValidationResult(false, "the date can not be before than admit date");
+                    return new ValidationResult(false, "la date ne peut pas précédée la date de réference");
                 }
                 return new ValidationResult(true, null);
             }
